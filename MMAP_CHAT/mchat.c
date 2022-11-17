@@ -1,3 +1,5 @@
+#include <unistd.h>
+#include <signal.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -5,14 +7,29 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/wait.h>
 
 #define SIZE 300
+
+int pid;
+
+
+void intHandler(int signo){
+		
+	if(pid!=0){	
+		printf("SIGNAL NUM%d\n", signo);
+		printf("Chatting Program is END\n");}
+//	else { wait(NULL); }
+		exit(0);
+
+}
 
 int main(int argc, char* argv[]){
 
 	char *message;
 	char buf[300], usrname[30];
 	int fd;
+
 
 	caddr_t addr;
 	struct stat sbuf;
@@ -40,7 +57,10 @@ int main(int argc, char* argv[]){
 	printf("input username... ");
 	scanf("%s", usrname);
 	
-	if(fork() == 0){
+	signal(SIGINT,intHandler);
+
+	pid = fork();
+	if(pid == 0){
 		while(1){
 			if(strcmp(message, buf) != 0){
 				strcpy(buf, message);
